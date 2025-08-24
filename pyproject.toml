@@ -1,0 +1,118 @@
+[build-system]
+requires = ["setuptools>=45", "wheel", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "odps-python"
+dynamic = ["version"]
+description = "High-performance Python library for Open Data Product Specification (ODPS) v4.0 with caching, validation, and international standards compliance"
+readme = "README.md"
+license = {text = "Apache-2.0"}
+authors = [
+    {name = "Chris Howard", email = "chris.howard@accenture.com"}
+]
+keywords = [
+    "open-data", "data-product", "specification", "odps", 
+    "iso-standards", "validation", "rfc", "e164", 
+    "iso639", "iso3166", "iso4217", "iso8601",
+    "performance", "caching", "protocols", "type-safety"
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Information Technology",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Database",
+]
+requires-python = ">=3.8"
+dependencies = [
+    "PyYAML>=6.0.2",
+    "pycountry>=24.6.1",
+    "phonenumbers>=9.0.11",
+]
+
+[project.optional-dependencies]
+validation = [
+    "pycountry>=24.6.1",
+    "phonenumbers>=9.0.11",
+]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=3.0.0",
+    "black>=22.0",
+    "flake8>=4.0",
+    "mypy>=0.991",
+    "pycountry>=24.6.1",
+    "phonenumbers>=9.0.11",
+    "build>=0.8.0",
+    "twine>=4.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/accenture/odps-python"
+Documentation = "https://github.com/accenture/odps-python#readme"
+Repository = "https://github.com/accenture/odps-python"
+"Bug Tracker" = "https://github.com/accenture/odps-python/issues"
+
+[tool.setuptools]
+packages = ["odps"]
+
+[tool.setuptools.dynamic]
+version = {attr = "odps.__version__"}
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --tb=short"
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+    "unit: marks tests as unit tests"
+]
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning"
+]
+
+[tool.coverage.run]
+source = ["odps"]
+branch = true
+omit = [
+    "*/tests/*",
+    "*/test_*"
+]
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "if TYPE_CHECKING:"
+]
+show_missing = true
+precision = 2

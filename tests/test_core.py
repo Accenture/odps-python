@@ -1,0 +1,192 @@
+"""Tests for core OpenDataProduct functionality."""
+
+import pytest
+import json
+import yaml
+import tempfile
+from pathlib import Path
+from unittest.mock import patch
+
+from odps import OpenDataProduct, ODPSValidationError
+from odps.models import ProductDetails
+
+
+class TestOpenDataProduct:
+    """Test cases for OpenDataProduct class."""
+
+    def test_init_with_product_details(self, sample_product_details):
+        """Test OpenDataProduct initialization with ProductDetails."""
+        product = OpenDataProduct(sample_product_details)
+        assert product.product_details == sample_product_details
+        assert product.schema == "https://opendataproducts.org/v4.0/schema/odps.json"
+        assert product.version == "4.0"
+
+    def test_init_with_dict(self, minimal_valid_odps_data):
+        """Test OpenDataProduct initialization with dictionary data."""
+        product = OpenDataProduct.from_dict(minimal_valid_odps_data)
+        assert product.product_details.name == "Test Dataset"
+        assert product.product_details.product_id == "test-001"
+        assert product.product_details.visibility == "public"
+
+    def test_to_dict(self, sample_odps_product):
+        """Test converting OpenDataProduct to dictionary."""
+        data = sample_odps_product.to_dict()
+        assert isinstance(data, dict)
+        assert data["schema"] == "https://opendataproducts.org/v4.0/schema/odps.json"
+        assert data["version"] == "4.0"
+        assert "product" in data
+        assert data["product"]["name"] == "Test Product"
+
+    def test_to_json(self, sample_odps_product):
+        """Test JSON serialization."""
+        json_str = sample_odps_product.to_json()
+        assert isinstance(json_str, str)
+        
+        # Verify it's valid JSON
+        data = json.loads(json_str)
+        assert data["schema"] == "https://opendataproducts.org/v4.0/schema/odps.json"
+        assert data["product"]["name"] == "Test Product"
+
+    def test_to_json_pretty(self, sample_odps_product):
+        """Test pretty JSON serialization."""
+        json_str = sample_odps_product.to_json(indent=2)
+        assert isinstance(json_str, str)
+        assert "\n" in json_str  # Should have newlines for pretty formatting
+        
+        # Verify it's still valid JSON
+        data = json.loads(json_str)
+        assert data["product"]["name"] == "Test Product"
+
+    def test_to_yaml(self, sample_odps_product):
+        """Test YAML serialization."""
+        yaml_str = sample_odps_product.to_yaml()
+        assert isinstance(yaml_str, str)
+        
+        # Verify it's valid YAML
+        data = yaml.safe_load(yaml_str)
+        assert data["schema"] == "https://opendataproducts.org/v4.0/schema/odps.json"
+        assert data["product"]["name"] == "Test Product"
+
+    def test_from_json(self, minimal_valid_odps_data):
+        """Test creating OpenDataProduct from JSON string."""
+        json_str = json.dumps(minimal_valid_odps_data)
+        product = OpenDataProduct.from_json(json_str)
+        
+        assert product.product_details.name == "Test Dataset"
+        assert product.product_details.product_id == "test-001"
+
+    def test_from_yaml(self, minimal_valid_odps_data):
+        """Test creating OpenDataProduct from YAML string."""
+        yaml_str = yaml.dump(minimal_valid_odps_data)
+        product = OpenDataProduct.from_yaml(yaml_str)
+        
+        assert product.product_details.name == "Test Dataset"
+        assert product.product_details.product_id == "test-001"
+
+    def test_load_from_json_file(self, demo_product_json_path):
+        """Test loading OpenDataProduct from JSON file."""
+        if demo_product_json_path.exists():
+            product = OpenDataProduct.from_file(demo_product_json_path)
+            assert isinstance(product, OpenDataProduct)
+            assert product.product_details.name is not None
+
+    def test_load_from_yaml_file(self, demo_product_yaml_path):
+        """Test loading OpenDataProduct from YAML file."""
+        if demo_product_yaml_path.exists():
+            product = OpenDataProduct.from_file(demo_product_yaml_path)
+            assert isinstance(product, OpenDataProduct)
+            assert product.product_details.name is not None
+
+    def test_save_json_file(self, sample_odps_product):
+        """Test saving OpenDataProduct to JSON file."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as tmp:
+            tmp_path = Path(tmp.name)
+        
+        try:
+            sample_odps_product.save(tmp_path)
+            assert tmp_path.exists()
+            
+            # Verify content
+            with open(tmp_path, 'r') as f:
+                data = json.load(f)
+            assert data["product"]["name"] == "Test Product"
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    def test_save_yaml_file(self, sample_odps_product):
+        """Test saving OpenDataProduct to YAML file."""
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.yaml', delete=False) as tmp:
+            tmp_path = Path(tmp.name)
+        
+        try:
+            sample_odps_product.save(tmp_path)
+            assert tmp_path.exists()
+            
+            # Verify content
+            with open(tmp_path, 'r') as f:
+                data = yaml.safe_load(f)
+            assert data["product"]["name"] == "Test Product"
+        finally:
+            tmp_path.unlink(missing_ok=True)
+
+    def test_validate_valid_product(self, sample_odps_product):
+        """Test validation of valid product."""
+        # This should not raise an exception
+        result = sample_odps_product.validate()
+        assert result is True
+
+    def test_validate_invalid_product(self, invalid_odps_data):
+        """Test validation of invalid product."""
+        with pytest.raises(ODPSValidationError):
+            product = OpenDataProduct.from_dict(invalid_odps_data)
+            product.validate()
+
+    def test_equality(self, sample_product_details):
+        """Test OpenDataProduct equality."""
+        product1 = OpenDataProduct(sample_product_details)
+        product2 = OpenDataProduct(sample_product_details)
+        
+        # Test that both have the same product details
+        assert product1.product_details == product2.product_details
+        assert product1.schema == product2.schema
+        assert product1.version == product2.version
+
+    def test_repr(self, sample_odps_product):
+        """Test OpenDataProduct string representation."""
+        repr_str = repr(sample_odps_product)
+        assert "OpenDataProduct" in repr_str
+        assert "Test Product" in repr_str
+
+    def test_hash(self, sample_odps_product):
+        """Test OpenDataProduct hashing."""
+        hash_val = hash(sample_odps_product)
+        assert isinstance(hash_val, int)
+
+    def test_update_product(self, sample_odps_product):
+        """Test updating product details."""
+        new_details = ProductDetails(
+            name="Updated Product",
+            product_id="updated-001",
+            visibility="private",
+            status="production",
+            type="api"
+        )
+        
+        sample_odps_product.product_details = new_details
+        assert sample_odps_product.product_details.name == "Updated Product"
+        assert sample_odps_product.product_details.visibility == "private"
+
+    def test_file_not_found_error(self):
+        """Test loading from non-existent file."""
+        with pytest.raises(FileNotFoundError):
+            OpenDataProduct.from_file(Path("nonexistent.json"))
+
+    def test_invalid_json_error(self):
+        """Test loading invalid JSON."""
+        with pytest.raises((json.JSONDecodeError, ValueError, Exception)):
+            OpenDataProduct.from_json("invalid json content")
+
+    def test_invalid_yaml_error(self):
+        """Test loading invalid YAML."""
+        with pytest.raises((yaml.YAMLError, ValueError, Exception)):
+            OpenDataProduct.from_yaml("invalid: yaml: content: [")

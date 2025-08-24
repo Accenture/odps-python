@@ -123,7 +123,7 @@ def custom_validation_demo():
     )
     
     api_access = DataAccessMethod(
-        name="API Access",
+        name={"en": "API Access"},
         output_port_type="API",
         access_url="https://api.example.com/data"
     )
@@ -256,7 +256,7 @@ def performance_monitoring_demo():
     
     # Multiple data access methods
     api_method = DataAccessMethod(
-        name="High-Performance API",
+        name={"en": "High-Performance API"},
         output_port_type="API",
         access_url="https://api.testing.com/v1/data",
         format="JSON"
@@ -348,7 +348,7 @@ def complex_document_creation():
         type=DataContractType.ODCS.value,
         contract_version="3.2",
         contract_url="https://datacorp.com/contracts/cip-v3.2.yaml",
-        specification={
+        spec={
             "version": "3.2",
             "schema": {
                 "customers": {
@@ -365,12 +365,13 @@ def complex_document_creation():
     
     # Add comprehensive SLA
     product.add_sla(
-        url="https://datacorp.com/sla/cip",
-        specification={
-            "availability": "99.9%",
-            "response_time": "< 100ms",
-            "throughput": "10000 requests/second",
-            "support": "24/7 enterprise support"
+        profiles={
+            "default": {
+                "availability": "99.9%",
+                "response_time": "< 100ms", 
+                "throughput": "10000 requests/second",
+                "support": "24/7 enterprise support"
+            }
         }
     )
     
@@ -410,8 +411,8 @@ def complex_document_creation():
     
     # Add multiple data access methods
     api_method = DataAccessMethod(
-        name="REST API",
-        description="High-performance RESTful API with OAuth2",
+        name={"en": "REST API"},
+        description={"en": "High-performance RESTful API with OAuth2"},
         output_port_type="API",
         format="JSON", 
         access_url="https://api.datacorp.com/cip/v3",

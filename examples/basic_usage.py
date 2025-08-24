@@ -90,8 +90,8 @@ def enhanced_document_with_components():
     
     # Add data access method
     api_method = DataAccessMethod(
-        name="REST API Access",
-        description="RESTful API with OAuth2 authentication",
+        name={"en": "REST API Access"},
+        description={"en": "RESTful API with OAuth2 authentication"},
         output_port_type="API",
         format="JSON",
         access_url="https://api.acme.com/v2/sales",

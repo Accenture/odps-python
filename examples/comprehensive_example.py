@@ -82,8 +82,8 @@ def main():
     ])
     
     odp.add_data_contract(
-        url="https://api.weather.example.com/contract",  # RFC 3986 URI
-        specification={
+        contract_url="https://api.weather.example.com/contract",  # RFC 3986 URI
+        spec={
             "format": "OpenAPI 3.0",
             "authentication": "Bearer Token",
             "rate_limit": "1000 requests/hour"

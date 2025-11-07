@@ -13,10 +13,10 @@
 # limitations under the License.
 
 """
-Data models for Open Data Product Specification (ODPS) v4.0 components.
+Data models for Open Data Product Specification (ODPS) v4.1 components.
 
 This module contains all the dataclass models that represent the various components
-of an ODPS v4.0 document. Each model follows the official specification and includes
+of an ODPS v4.1 document. Each model follows the official specification and includes
 comprehensive validation support.
 
 The models are organized into the following categories:
@@ -26,6 +26,7 @@ Core Models:
     - UseCase: Product use case information
 
 Optional Component Models:
+    - ProductStrategy: Business strategy alignment (new in v4.1)
     - DataContract: Data contract specifications
     - SLA: Service Level Agreement definitions
     - DataQuality: Data quality metrics and profiles
@@ -36,6 +37,7 @@ Optional Component Models:
     - PaymentGateways: Payment processing configuration
 
 Supporting Models:
+    - KPI: Key Performance Indicator (new in v4.1)
     - DataAccessMethod: Individual data access method
     - PricingPlan: Individual pricing plan
     - PaymentGateway: Individual payment gateway
@@ -44,7 +46,7 @@ Supporting Models:
     - SpecificationExtensions: Custom extension fields (x- prefixed)
 
 All models support:
-    - Full ODPS v4.0 specification compliance
+    - Full ODPS v4.1 specification compliance
     - Optional and required field validation
     - International standards compliance (ISO, RFC, ITU-T)
     - Automatic snake_case to camelCase conversion for JSON output
@@ -101,6 +103,57 @@ class UseCase:
 
 
 @dataclass
+class KPI:
+    """
+    Key Performance Indicator (KPI) - New in ODPS v4.1
+
+    Represents a measurable metric for tracking business or product performance.
+    Used within ProductStrategy to connect data products to business objectives.
+
+    Attributes:
+        name: Human-readable KPI name (required)
+        id: Unique identifier for the KPI
+        unit: Measurement unit (percentage, minutes, seconds, count, etc.)
+        target: Target value for the KPI
+        direction: How the KPI should move (increase, decrease, at_least, at_most, equals)
+        calculation: Human-readable formula describing how the KPI is calculated
+        description: Detailed description of what the KPI measures
+    """
+
+    name: str  # Required field
+    id: Optional[str] = None
+    unit: Optional[str] = None  # KPIUnit enum values
+    target: Optional[Union[str, int, float]] = None
+    direction: Optional[str] = None  # KPIDirection enum values
+    calculation: Optional[str] = None
+    description: Optional[str] = None
+
+
+@dataclass
+class ProductStrategy:
+    """
+    Product Strategy - New in ODPS v4.1
+
+    Connects data products to business intent, objectives, and KPIs.
+    This is "the first open specification where data products declare not just
+    what they are but also why they exist."
+
+    Attributes:
+        objectives: Natural-language business outcomes the product supports
+        contributes_to_kpi: Single higher-level business KPI the product is accountable for
+        product_kpis: Product-level metrics measuring direct contribution to business goals
+        related_kpis: Secondary measures tracking side effects and cross-unit value
+        strategic_alignment: References to corporate initiatives or policy documents
+    """
+
+    objectives: List[str] = field(default_factory=list)
+    contributes_to_kpi: Optional[KPI] = None
+    product_kpis: List[KPI] = field(default_factory=list)
+    related_kpis: List[KPI] = field(default_factory=list)
+    strategic_alignment: List[str] = field(default_factory=list)
+
+
+@dataclass
 class ProductDetails:
     """Product information and metadata"""
 
@@ -138,7 +191,7 @@ class ProductDetails:
 
 @dataclass
 class DataContract:
-    """Data contract specifications"""
+    """Data contract specifications with v4.1 $ref support"""
 
     # Optional attributes
     id: Optional[str] = None  # Unique identifier
@@ -147,6 +200,7 @@ class DataContract:
     contract_url: Optional[str] = None  # URL to contract
     spec: Optional[Dict[str, Any]] = None  # Inline YAML specification
     ref: Optional[str] = None  # URI reference
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
@@ -160,7 +214,7 @@ class SLADimension:
 
 @dataclass
 class SLAProfile:
-    """Named SLA profile (e.g., default, premium)"""
+    """Named SLA profile (e.g., default, premium) with v4.1 $ref support"""
 
     dimensions: List[SLADimension] = field(default_factory=list)
     monitoring_specification: Optional[Dict[str, Any]] = None  # Executable monitoring
@@ -169,13 +223,15 @@ class SLAProfile:
     support_email: Optional[str] = None
     service_hours: Optional[str] = None  # Phone/email service hours
     documentation_url: Optional[str] = None
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
 class SLA:
-    """Service Level Agreement with multiple named profiles"""
+    """Service Level Agreement with multiple named profiles and v4.1 $ref support"""
 
     profiles: Dict[str, SLAProfile] = field(default_factory=dict)
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
@@ -191,17 +247,19 @@ class DataQualityDimension:
 
 @dataclass
 class DataQualityProfile:
-    """Named data quality profile"""
+    """Named data quality profile with v4.1 $ref support"""
 
     dimensions: List[DataQualityDimension] = field(default_factory=list)
     quality_checks: Optional[Dict[str, Any]] = None  # Executable quality checks
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
 class DataQuality:
-    """Data quality specifications with named profiles"""
+    """Data quality specifications with named profiles and v4.1 $ref support"""
 
     profiles: Dict[str, DataQualityProfile] = field(default_factory=dict)
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
@@ -266,12 +324,12 @@ class License:
 
 @dataclass
 class DataAccessMethod:
-    """Individual data access method (e.g., default, API, agent)"""
+    """Individual data access method (e.g., default, API, agent) with v4.1 $ref and AI support"""
 
     name: Optional[Dict[str, str]] = None  # Multilingual name
     description: Optional[Dict[str, str]] = None  # Multilingual description
-    output_port_type: Optional[str] = None  # file, API, etc.
-    format: Optional[str] = None  # JSON, CSV, etc.
+    output_port_type: Optional[str] = None  # file, API, AI (v4.1), etc.
+    format: Optional[str] = None  # JSON, CSV, MCP (v4.1), etc.
     access_url: Optional[str] = None
     authentication_method: Optional[str] = None
     specs_url: Optional[str] = None
@@ -279,14 +337,16 @@ class DataAccessMethod:
     specification: Optional[Dict[str, Any]] = None
     version: Optional[str] = None  # Version of the access method
     reference: Optional[str] = None  # Reference details
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
 class DataAccess:
-    """Data access specifications with required default method"""
+    """Data access specifications with required default method and v4.1 $ref support"""
 
     default: DataAccessMethod
     additional_methods: Dict[str, DataAccessMethod] = field(default_factory=dict)
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
@@ -317,7 +377,7 @@ class DataHolder:
 
 @dataclass
 class PaymentGateway:
-    """Payment gateway information with comprehensive optional attributes"""
+    """Payment gateway information with comprehensive optional attributes and v4.1 $ref support"""
 
     name: Union[str, Dict[str, str]]  # String or multilingual dict
     url: str
@@ -328,16 +388,18 @@ class PaymentGateway:
     version: Optional[str] = None  # Gateway version
     reference: Optional[str] = None  # Reference details
     executable_specifications: Optional[Dict[str, Any]] = None
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass
 class PaymentGateways:
-    """Payment gateways collection with multiple gateway configurations"""
+    """Payment gateways collection with multiple gateway configurations and v4.1 $ref support"""
 
     gateways: List[PaymentGateway] = field(default_factory=list)
     named_gateways: Dict[str, PaymentGateway] = field(
         default_factory=dict
     )  # Named gateway configs
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 
 @dataclass

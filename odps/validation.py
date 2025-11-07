@@ -461,6 +461,66 @@ class ValuePropositionValidator(ValidationRule):
         return errors
 
 
+class ProductStrategyValidator(ValidationRule):
+    """Validates product strategy and KPIs (ODPS v4.1)"""
+
+    def validate(self, odp: "OpenDataProduct") -> List[str]:
+        errors = []
+
+        if not odp.product_strategy:
+            return errors  # Optional component
+
+        ps = odp.product_strategy
+
+        # Validate contributesToKPI
+        if ps.contributes_to_kpi:
+            kpi_errors = self._validate_kpi(ps.contributes_to_kpi, "contributesToKPI")
+            errors.extend(kpi_errors)
+
+        # Validate productKPIs
+        for i, kpi in enumerate(ps.product_kpis):
+            kpi_errors = self._validate_kpi(kpi, f"productKPIs[{i}]")
+            errors.extend(kpi_errors)
+
+        # Validate relatedKPIs
+        for i, kpi in enumerate(ps.related_kpis):
+            kpi_errors = self._validate_kpi(kpi, f"relatedKPIs[{i}]")
+            errors.extend(kpi_errors)
+
+        # Validate objectives (optional but should be list if present)
+        if ps.objectives is not None and not isinstance(ps.objectives, list):
+            errors.append("productStrategy.objectives must be a list")
+
+        # Validate strategicAlignment (optional but should be list if present)
+        if ps.strategic_alignment is not None and not isinstance(
+            ps.strategic_alignment, list
+        ):
+            errors.append("productStrategy.strategicAlignment must be a list")
+
+        return errors
+
+    def _validate_kpi(self, kpi, field_name: str) -> List[str]:
+        """Validate individual KPI"""
+        errors = []
+        from .enums import KPIDirection, KPIUnit
+
+        # Name is required
+        if not kpi.name:
+            errors.append(f"{field_name}.name is required")
+
+        # Validate direction if present
+        if kpi.direction and kpi.direction not in KPIDirection.values():
+            errors.append(
+                f"{field_name}.direction must be one of: {KPIDirection.values()}"
+            )
+
+        # Validate unit if present
+        if kpi.unit and kpi.unit not in KPIUnit.values():
+            errors.append(f"{field_name}.unit must be one of: {KPIUnit.values()}")
+
+        return errors
+
+
 class ODPSValidationFramework:
     """Main validation framework that orchestrates all validation rules"""
 
@@ -480,6 +540,7 @@ class ODPSValidationFramework:
             PaymentGatewaysValidator(),
             ExtensionsValidator(),
             ValuePropositionValidator(),
+            ProductStrategyValidator(),
         ]
 
     def add_validator(self, validator: ValidationRule) -> None:

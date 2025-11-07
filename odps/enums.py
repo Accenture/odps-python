@@ -13,7 +13,7 @@
 # limitations under the License.
 
 """
-Enumeration classes for ODPS v4.0 constants
+Enumeration classes for ODPS v4.1 constants
 """
 
 from enum import Enum
@@ -95,6 +95,7 @@ class OutputPortType(Enum):
     DATABASE = "database"
     STREAM = "stream"
     WEBHOOK = "webhook"
+    AI = "AI"  # New in v4.1 - AI agent integration via MCP
 
     @classmethod
     def values(cls):
@@ -196,4 +197,48 @@ class PricingModel(Enum):
     @classmethod
     def values(cls):
         """Return list of all valid pricing model values"""
+        return [item.value for item in cls]
+
+
+class KPIDirection(Enum):
+    """KPI target direction values according to ODPS v4.1"""
+
+    INCREASE = "increase"
+    DECREASE = "decrease"
+    AT_LEAST = "at_least"
+    AT_MOST = "at_most"
+    EQUALS = "equals"
+
+    @classmethod
+    def values(cls):
+        """Return list of all valid KPI direction values"""
+        return [item.value for item in cls]
+
+
+class KPIUnit(Enum):
+    """Common KPI measurement units according to ODPS v4.1"""
+
+    PERCENTAGE = "percentage"
+    MINUTES = "minutes"
+    SECONDS = "seconds"
+    HOURS = "hours"
+    DAYS = "days"
+    COUNT = "count"
+    CURRENCY = "currency"
+    RATIO = "ratio"
+    SCORE = "score"
+    BYTES = "bytes"
+    KILOBYTES = "kilobytes"
+    MEGABYTES = "megabytes"
+    GIGABYTES = "gigabytes"
+    TERABYTES = "terabytes"
+    REQUESTS = "requests"
+    TRANSACTIONS = "transactions"
+    USERS = "users"
+    ERRORS = "errors"
+    RECORDS = "records"
+
+    @classmethod
+    def values(cls):
+        """Return list of all valid KPI unit values"""
         return [item.value for item in cls]

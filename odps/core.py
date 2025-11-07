@@ -61,6 +61,8 @@ import hashlib
 
 from .models import (
     ProductDetails,
+    ProductStrategy,
+    KPI,
     DataContract,
     SLA,
     DataQuality,
@@ -169,6 +171,7 @@ class OpenDataProduct:
         "schema",
         "version",
         "product_details",
+        "product_strategy",
         "data_contract",
         "sla",
         "data_quality",
@@ -183,8 +186,8 @@ class OpenDataProduct:
         "_hash_cache",
     ]
 
-    REQUIRED_SCHEMA = "https://opendataproducts.org/v4.0/schema/odps.json"
-    REQUIRED_VERSION = "4.0"
+    REQUIRED_SCHEMA = "https://opendataproducts.org/v4.1/schema/odps.json"
+    REQUIRED_VERSION = "4.1"
 
     # Field mapping for snake_case to camelCase conversion
     PRODUCT_DETAILS_MAPPING = {
@@ -204,6 +207,18 @@ class OpenDataProduct:
     DATA_CONTRACT_MAPPING = {
         "contract_version": "contractVersion",
         "contract_url": "contractURL",
+        "dollar_ref": "$ref",
+    }
+
+    PRODUCT_STRATEGY_MAPPING = {
+        "contributes_to_kpi": "contributesToKPI",
+        "product_kpis": "productKPIs",
+        "related_kpis": "relatedKPIs",
+        "strategic_alignment": "strategicAlignment",
+    }
+
+    KPI_MAPPING = {
+        # All KPI fields use their existing names (no camelCase conversion needed)
     }
 
     LICENSE_MAPPING = {
@@ -259,9 +274,21 @@ class OpenDataProduct:
         "authentication_method": "authenticationMethod",
         "specs_url": "specsURL",
         "documentation_url": "documentationURL",
+        "dollar_ref": "$ref",
     }
 
-    PAYMENT_GATEWAY_MAPPING = {"executable_specifications": "executableSpecifications"}
+    PAYMENT_GATEWAY_MAPPING = {
+        "executable_specifications": "executableSpecifications",
+        "dollar_ref": "$ref",
+    }
+
+    SLA_MAPPING = {
+        "dollar_ref": "$ref",
+    }
+
+    DATA_QUALITY_MAPPING = {
+        "dollar_ref": "$ref",
+    }
 
     @staticmethod
     def _convert_snake_to_camel(
@@ -286,6 +313,7 @@ class OpenDataProduct:
                 "schema": self.schema,
                 "version": self.version,
                 "product_details": str(self.product_details),
+                "product_strategy": str(self.product_strategy),
                 "data_contract": str(self.data_contract),
                 "sla": str(self.sla),
                 "data_quality": str(self.data_quality),
@@ -319,6 +347,7 @@ class OpenDataProduct:
         self.product_details = product_details
 
         # Optional components
+        self.product_strategy: Optional[ProductStrategy] = None  # New in v4.1
         self.data_contract: Optional[DataContract] = None
         self.sla: Optional[SLA] = None
         self.data_quality: Optional[DataQuality] = None
@@ -400,6 +429,60 @@ class OpenDataProduct:
         instance.schema = schema or cls.REQUIRED_SCHEMA
         instance.version = version or cls.REQUIRED_VERSION
 
+        # Load product strategy (v4.1)
+        if "productStrategy" in product_data:
+            ps_data = product_data["productStrategy"]
+
+            # Parse contributes_to_kpi
+            contributes_to_kpi = None
+            if "contributesToKPI" in ps_data:
+                kpi_data = ps_data["contributesToKPI"]
+                contributes_to_kpi = KPI(
+                    name=kpi_data.get("name", ""),
+                    id=kpi_data.get("id"),
+                    unit=kpi_data.get("unit"),
+                    target=kpi_data.get("target"),
+                    direction=kpi_data.get("direction"),
+                    calculation=kpi_data.get("calculation"),
+                    description=kpi_data.get("description"),
+                )
+
+            # Parse product_kpis
+            product_kpis = []
+            for kpi_data in ps_data.get("productKPIs", []):
+                kpi = KPI(
+                    name=kpi_data.get("name", ""),
+                    id=kpi_data.get("id"),
+                    unit=kpi_data.get("unit"),
+                    target=kpi_data.get("target"),
+                    direction=kpi_data.get("direction"),
+                    calculation=kpi_data.get("calculation"),
+                    description=kpi_data.get("description"),
+                )
+                product_kpis.append(kpi)
+
+            # Parse related_kpis
+            related_kpis = []
+            for kpi_data in ps_data.get("relatedKPIs", []):
+                kpi = KPI(
+                    name=kpi_data.get("name", ""),
+                    id=kpi_data.get("id"),
+                    unit=kpi_data.get("unit"),
+                    target=kpi_data.get("target"),
+                    direction=kpi_data.get("direction"),
+                    calculation=kpi_data.get("calculation"),
+                    description=kpi_data.get("description"),
+                )
+                related_kpis.append(kpi)
+
+            instance.product_strategy = ProductStrategy(
+                objectives=ps_data.get("objectives", []),
+                contributes_to_kpi=contributes_to_kpi,
+                product_kpis=product_kpis,
+                related_kpis=related_kpis,
+                strategic_alignment=ps_data.get("strategicAlignment", []),
+            )
+
         # Load data holder
         if "dataHolder" in product_data:
             dh_data = product_data["dataHolder"]
@@ -453,7 +536,8 @@ class OpenDataProduct:
                 contract_version=dc_data.get("contractVersion"),
                 contract_url=dc_data.get("contractURL"),
                 spec=dc_data.get("spec"),
-                ref=dc_data.get("$ref"),
+                ref=dc_data.get("ref"),
+                dollar_ref=dc_data.get("$ref"),
             )
 
         if "SLA" in product_data:
@@ -764,6 +848,19 @@ class OpenDataProduct:
         self._convert_snake_to_camel(product, self.PRODUCT_DETAILS_MAPPING)
 
         # Add optional components
+        if self.product_strategy:
+            ps_dict = asdict(self.product_strategy)
+            self._convert_snake_to_camel(ps_dict, self.PRODUCT_STRATEGY_MAPPING)
+            # Convert nested KPI objects
+            if ps_dict.get("contributesToKPI"):
+                self._convert_snake_to_camel(ps_dict["contributesToKPI"], self.KPI_MAPPING)
+            if ps_dict.get("productKPIs"):
+                for kpi in ps_dict["productKPIs"]:
+                    self._convert_snake_to_camel(kpi, self.KPI_MAPPING)
+            if ps_dict.get("relatedKPIs"):
+                for kpi in ps_dict["relatedKPIs"]:
+                    self._convert_snake_to_camel(kpi, self.KPI_MAPPING)
+            product["productStrategy"] = ps_dict
         if self.data_contract:
             dc_dict = asdict(self.data_contract)
             self._convert_snake_to_camel(dc_dict, self.DATA_CONTRACT_MAPPING)

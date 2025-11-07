@@ -4,12 +4,18 @@
 [![Python Support](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://github.com/accenture/odps-python)
 [![License: Apache-2.0](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
-A comprehensive, high-performance Python library for creating, validating, and manipulating [Open Data Product Specification (ODPS) v4.0](https://opendataproducts.org/v4.0/) documents with full international standards compliance.
+A comprehensive, high-performance Python library for creating, validating, and manipulating [Open Data Product Specification (ODPS) v4.1](https://opendataproducts.org/v4.1/) documents with full international standards compliance.
 
 ## 🚀 Features
 
+### ODPS v4.1 Features (NEW!)
+- **ProductStrategy**: Connect data products to business objectives, KPIs, and strategic initiatives
+- **KPI Support**: Define and track Key Performance Indicators with targets, units, and calculations
+- **AI Agent Integration**: Support for AI agents via Model Context Protocol (MCP)
+- **Enhanced $ref Support**: JSON Reference syntax for component reusability
+
 ### Core Capabilities
-- **Complete ODPS v4.0 Support**: Full implementation of the Open Data Product Specification
+- **Complete ODPS v4.1 Support**: Full implementation of the latest Open Data Product Specification
 - **International Standards Compliance**: Validates against ISO, RFC, and ITU-T standards
 - **Flexible I/O**: JSON and YAML serialization/deserialization support
 - **Type Safety**: Comprehensive type hints and protocol-based duck typing
@@ -49,14 +55,23 @@ pip install "odps-python[dev]"
 
 ## Quick Start
 
+### Basic Usage (v4.1)
+
 ```python
 from odps import OpenDataProduct
-from odps.models import ProductDetails, DataAccessMethod, DataHolder, License
+from odps.models import (
+    ProductDetails,
+    ProductStrategy,
+    KPI,
+    DataAccessMethod,
+    DataHolder,
+    License
+)
 
 # Create a new data product with international standards compliance
 product = ProductDetails(
     name="My Weather API",
-    product_id="weather-api-v1", 
+    product_id="weather-api-v1",
     visibility="public",
     status="production",
     type="dataset",
@@ -67,6 +82,27 @@ product = ProductDetails(
 
 # Create ODPS document
 odp = OpenDataProduct(product)
+
+# NEW in v4.1: Add ProductStrategy to connect to business objectives
+strategy = ProductStrategy(
+    objectives=["Improve weather forecasting accuracy for disaster prevention"],
+    contributes_to_kpi=KPI(
+        name="Disaster Prevention Response Time",
+        unit="minutes",
+        target=15,
+        direction="at_most",
+        calculation="Time from alert to action"
+    ),
+    product_kpis=[
+        KPI(
+            name="Forecast Accuracy",
+            unit="percentage",
+            target=95,
+            direction="at_least"
+        )
+    ]
+)
+odp.product_strategy = strategy
 
 # Add data access with required default method
 default_access = DataAccessMethod(
@@ -116,18 +152,19 @@ loaded = OpenDataProduct.from_file("my-product.json")
 - `type`: dataset, algorithm, etc.
 
 ### Optional Components
-- **DataContract**: API specifications and data schemas
-- **SLA**: Service level agreements  
-- **DataQuality**: Quality metrics and rules
+- **ProductStrategy** (NEW v4.1): Business objectives, KPIs, and strategic alignment
+- **DataContract**: API specifications and data schemas (now with $ref support)
+- **SLA**: Service level agreements (now with $ref support)
+- **DataQuality**: Quality metrics and rules (now with $ref support)
 - **PricingPlans**: Pricing tiers with ISO 4217 currency validation
 - **License**: Usage rights with ISO 8601 date validation
-- **DataAccess**: Access methods (requires `default` method per ODPS v4.0)
+- **DataAccess**: Access methods including AI agent support (NEW v4.1: MCP protocol)
 - **DataHolder**: Contact information with email/phone validation
-- **PaymentGateways**: Payment processing details
+- **PaymentGateways**: Payment processing details (now with $ref support)
 
 ## Validation Standards
 
-The library enforces all international standards referenced in ODPS v4.0:
+The library enforces all international standards referenced in ODPS v4.1:
 
 | Standard | Used For | Example |
 |----------|----------|----------|
@@ -262,11 +299,30 @@ except ODPSValidationError as e:
     #          dataHolder email must be a valid RFC 5322 email address"
 ```
 
+## 📖 Examples
+
+### Complete v4.1 Example
+See [examples/odps_v41_example.py](examples/odps_v41_example.py) for a comprehensive demonstration of all v4.1 features including:
+- ProductStrategy with business objectives
+- KPI definitions with targets and calculations
+- AI agent integration via MCP
+- Enhanced $ref support
+
+Run the example:
+```bash
+python examples/odps_v41_example.py
+```
+
+### Additional Examples
+- [Basic ODPS Creation](examples/basic_example.py)
+- [Comprehensive ODPS Document](examples/comprehensive_example.py)
+- [Validation Examples](examples/validation_example.py)
+
 ## 🏆 Acknowledgments
 
 We extend our gratitude to the following:
 
-**[Open Data Product Initiative Team](https://opendataproducts.org/)** - Special thanks to the team at opendataproducts.org for their work in creating and maintaining the Open Data Product Specification (ODPS). Their vision of standardizing data product descriptions and enabling better data discovery and interoperability has made this library possible. The ODPS v4.0 specification represents years of collaborative effort from industry experts, data practitioners, and open source contributors who are driving the future of data standardization.
+**[Open Data Product Initiative Team](https://opendataproducts.org/)** - Special thanks to the team at opendataproducts.org for their work in creating and maintaining the Open Data Product Specification (ODPS). Their vision of standardizing data product descriptions and enabling better data discovery and interoperability has made this library possible. The ODPS v4.1 specification represents years of collaborative effort from industry experts, data practitioners, and open source contributors who are driving the future of data standardization.
 
 **Python Community** - For the exceptional ecosystem of libraries and tools that power this implementation, including PyYAML, pycountry, phonenumbers, and the countless other packages that make Python development a joy.
 
@@ -274,8 +330,9 @@ We extend our gratitude to the following:
 
 ## 📚 Links & References
 
-- [Open Data Product Specification v4.0](https://opendataproducts.org/v4.0/)
-- [ODPS Schema](https://opendataproducts.org/v4.0/schema/)
+- [Open Data Product Specification v4.1](https://opendataproducts.org/v4.1/)
+- [ODPS v4.0 → v4.1 Migration Guide](https://opendataproducts.org/v4.1/#odps-4-0-4-1-migration-guide)
+- [ODPS Schema](https://opendataproducts.org/v4.1/schema/)
 - [ISO 639-1 Language Codes](https://en.wikipedia.org/wiki/List_of_ISO_639-1_codes)
 - [ISO 3166-1 Country Codes](https://en.wikipedia.org/wiki/ISO_3166-1_alpha-2)
 - [ISO 4217 Currency Codes](https://en.wikipedia.org/wiki/ISO_4217)

@@ -16,10 +16,13 @@
 Open Data Product Specification (ODPS) Python Library
 
 A comprehensive, high-performance Python library for creating, validating, and manipulating
-Open Data Product Specification (ODPS) v4.0 documents with full international standards compliance.
+Open Data Product Specification (ODPS) v4.1 documents with full international standards compliance.
 
 Features:
-    - Complete ODPS v4.0 specification support
+    - Complete ODPS v4.1 specification support
+    - ProductStrategy for business alignment (new in v4.1)
+    - AI agent integration via MCP (new in v4.1)
+    - Enhanced $ref support for component referencing (new in v4.1)
     - Full validation with detailed error reporting
     - Element support with international standards (ISO, RFC, ITU-T)
     - Validation caching and optimizations
@@ -28,7 +31,7 @@ Features:
     - Modular architecture with pluggable validators
 
 Quick Start:
-    >>> from odps import OpenDataProduct, ProductDetails
+    >>> from odps import OpenDataProduct, ProductDetails, ProductStrategy, KPI
     >>>
     >>> # Create product details
     >>> details = ProductDetails(
@@ -42,6 +45,13 @@ Quick Start:
     >>> # Create ODPS document
     >>> product = OpenDataProduct(details)
     >>>
+    >>> # Add product strategy (v4.1)
+    >>> strategy = ProductStrategy(
+    ...     objectives=["Improve customer retention"],
+    ...     product_kpis=[KPI(name="Churn Rate", unit="percentage", target=5)]
+    ... )
+    >>> product.product_strategy = strategy
+    >>>
     >>> # Validate and export
     >>> product.validate()  # True
     >>> json_str = product.to_json()
@@ -50,6 +60,8 @@ Quick Start:
 Main Classes:
     OpenDataProduct: Main class for ODPS documents
     ProductDetails: Core product information model
+    ProductStrategy: Business strategy alignment (v4.1)
+    KPI: Key Performance Indicator (v4.1)
     ODPSValidator: Validation utilities
     ODPSValidationError: Validation error exception
 
@@ -63,7 +75,7 @@ Modules:
     exceptions: Exception hierarchy
 
 For detailed documentation, see: https://github.com/accenture/odps-python
-For ODPS specification: https://opendataproducts.org/v4.0/
+For ODPS specification: https://opendataproducts.org/v4.1/
 """
 
 __version__ = "0.1.0"

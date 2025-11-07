@@ -5,6 +5,63 @@ All notable changes to the ODPS Python library will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased] - v4.1 Support
+
+### 🎉 ODPS v4.1 Support
+
+A major update adding full support for ODPS v4.1 specification with ProductStrategy, AI agent integration, and enhanced referencing capabilities.
+
+#### ✨ New Features (v4.1)
+
+**ProductStrategy Component**
+- Added `ProductStrategy` dataclass for connecting data products to business objectives
+- Added `KPI` dataclass for defining Key Performance Indicators
+- Support for business objectives, contributesToKPI, productKPIs, and relatedKPIs
+- Strategic alignment tracking with corporate initiatives
+- Added `KPIDirection` enum: increase, decrease, at_least, at_most, equals
+- Added `KPIUnit` enum: percentage, minutes, seconds, count, currency, and more
+- Comprehensive validation for ProductStrategy and KPI fields
+- Added `ProductStrategyValidator` to validation framework
+
+**AI Agent Integration**
+- Added `AI` output port type for AI agent data access
+- Support for Model Context Protocol (MCP) specification
+- AI agent-native delivery mechanisms
+- Autonomous machine consumption patterns
+
+**Enhanced $ref Support**
+- Added `dollar_ref` field to DataContract, SLA, DataQuality, DataAccess, and PaymentGateway models
+- JSON Reference syntax support for internal references (#/product/...)
+- JSON Reference syntax support for external URL-based references
+- DRY principle implementation for component reusability
+
+**Schema Updates**
+- Updated schema URL to `https://opendataproducts.org/v4.1/schema/odps.json`
+- Updated version to `4.1`
+- Full backward compatibility with v4.0 documents
+
+#### 🔧 Technical Improvements
+- Added field mappings for ProductStrategy serialization (snake_case ↔ camelCase)
+- Extended `OpenDataProduct.__slots__` with `product_strategy` field
+- Updated `_generate_hash()` to include product_strategy for cache invalidation
+- Enhanced `to_dict()` with ProductStrategy and nested KPI serialization
+- Enhanced `from_dict()` with ProductStrategy and KPI parsing
+- Updated all component docstrings to reference v4.1
+
+#### 📚 Documentation
+- Updated README.md with v4.1 feature overview
+- Added comprehensive v4.1 example (examples/odps_v41_example.py)
+- Updated Quick Start guide with ProductStrategy usage
+- Updated Optional Components list with v4.1 additions
+- Added links to v4.0 → v4.1 migration guide
+
+#### 🔄 Migration Notes
+- **Fully backward compatible** - v4.0 documents work without modification
+- ProductStrategy is optional - existing code continues to function
+- New KPI enums available but optional
+- AI output port type is optional enhancement
+- $ref support is optional feature
+
 ## [0.1.0] - 2024-08-19
 
 ### 🎉 Initial Release

@@ -328,6 +328,8 @@ We extend our gratitude to the following:
 
 **Data Community** - For embracing open standards and driving the need for better data product specifications and tooling that benefits everyone in the data ecosystem.
 
+**Documentation Support** - Documentation assistance provided by Claude (Anthropic).
+
 ## 📚 Links & References
 
 - [Open Data Product Specification v4.1](https://opendataproducts.org/v4.1/)

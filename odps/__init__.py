@@ -78,7 +78,7 @@ For detailed documentation, see: https://github.com/accenture/odps-python
 For ODPS specification: https://opendataproducts.org/v4.1/
 """
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 from .core import OpenDataProduct
 from .models import *

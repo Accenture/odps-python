@@ -440,11 +440,14 @@ class OpenDataProduct:
                 contributes_to_kpi = KPI(
                     name=kpi_data.get("name", ""),
                     id=kpi_data.get("id"),
+                    description=kpi_data.get("description"),
                     unit=kpi_data.get("unit"),
                     target=kpi_data.get("target"),
                     direction=kpi_data.get("direction"),
+                    timeframe=kpi_data.get("timeframe"),
+                    frequency=kpi_data.get("frequency"),
+                    owner=kpi_data.get("owner"),
                     calculation=kpi_data.get("calculation"),
-                    description=kpi_data.get("description"),
                 )
 
             # Parse product_kpis
@@ -453,11 +456,14 @@ class OpenDataProduct:
                 kpi = KPI(
                     name=kpi_data.get("name", ""),
                     id=kpi_data.get("id"),
+                    description=kpi_data.get("description"),
                     unit=kpi_data.get("unit"),
                     target=kpi_data.get("target"),
                     direction=kpi_data.get("direction"),
+                    timeframe=kpi_data.get("timeframe"),
+                    frequency=kpi_data.get("frequency"),
+                    owner=kpi_data.get("owner"),
                     calculation=kpi_data.get("calculation"),
-                    description=kpi_data.get("description"),
                 )
                 product_kpis.append(kpi)
 
@@ -467,11 +473,14 @@ class OpenDataProduct:
                 kpi = KPI(
                     name=kpi_data.get("name", ""),
                     id=kpi_data.get("id"),
+                    description=kpi_data.get("description"),
                     unit=kpi_data.get("unit"),
                     target=kpi_data.get("target"),
                     direction=kpi_data.get("direction"),
+                    timeframe=kpi_data.get("timeframe"),
+                    frequency=kpi_data.get("frequency"),
+                    owner=kpi_data.get("owner"),
                     calculation=kpi_data.get("calculation"),
-                    description=kpi_data.get("description"),
                 )
                 related_kpis.append(kpi)
 

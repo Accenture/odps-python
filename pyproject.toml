@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "odps-python"
 dynamic = ["version"]
-description = "High-performance Python library for Open Data Product Specification (ODPS) v4.0 with caching, validation, and international standards compliance"
+description = "High-performance Python library for Open Data Product Specification (ODPS) v4.1 with ProductStrategy, AI integration, caching, validation, and international standards compliance"
 readme = "README.md"
 license = {text = "Apache-2.0"}
 authors = [

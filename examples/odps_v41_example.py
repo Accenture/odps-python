@@ -160,7 +160,7 @@ def create_v41_example():
         name="Acme Corporation Data Team",
         email="data-team@example.com",
         url="https://example.com/data-team",
-        phone_number="+1-555-0123",
+        phone_number="+61444123456",
         contact_person="Jane Smith",
         contact_email="jane.smith@example.com",
         organizational_description="Enterprise data platform team managing customer analytics",

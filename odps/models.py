@@ -113,20 +113,26 @@ class KPI:
     Attributes:
         name: Human-readable KPI name (required)
         id: Unique identifier for the KPI
+        description: Human-readable explanation of the KPI
         unit: Measurement unit (percentage, minutes, seconds, count, etc.)
         target: Target value for the KPI
         direction: How the KPI should move (increase, decrease, at_least, at_most, equals)
+        timeframe: When target should be met
+        frequency: Measurement cadence (hourly, daily, monthly, etc.)
+        owner: Responsible role/team for this KPI
         calculation: Human-readable formula describing how the KPI is calculated
-        description: Detailed description of what the KPI measures
     """
 
     name: str  # Required field
     id: Optional[str] = None
+    description: Optional[str] = None
     unit: Optional[str] = None  # KPIUnit enum values
     target: Optional[Union[str, int, float]] = None
     direction: Optional[str] = None  # KPIDirection enum values
+    timeframe: Optional[str] = None
+    frequency: Optional[str] = None
+    owner: Optional[str] = None
     calculation: Optional[str] = None
-    description: Optional[str] = None
 
 
 @dataclass

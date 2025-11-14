@@ -3,7 +3,10 @@
 Basic ODPS Python Library Usage Examples
 
 This script demonstrates the fundamental features of the ODPS Python library
-including creating, validating, and exporting ODPS v4.0 documents.
+including creating, validating, and exporting ODPS v4.1 documents.
+
+Note: For v4.1-specific features (ProductStrategy, KPI, AI agents),
+see odps_v41_example.py
 """
 
 from odps import OpenDataProduct, ProductDetails

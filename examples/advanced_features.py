@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Advanced ODPS Python Library Features Examples
+Advanced ODPS Python Library Features Examples (ODPS v4.1)
 
 This script demonstrates advanced features including:
 - Protocol compliance checking
@@ -8,6 +8,9 @@ This script demonstrates advanced features including:
 - Performance monitoring
 - Complex component configurations
 - Multilingual support
+
+Note: For v4.1-specific features (ProductStrategy, KPI, AI agents),
+see odps_v41_example.py
 """
 
 from odps import OpenDataProduct, ProductDetails

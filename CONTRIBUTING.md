@@ -31,7 +31,7 @@ This project adheres to a code of conduct adapted from the [Contributor Covenant
 
 - Python 3.8 or higher
 - Git
-- Basic understanding of ODPS v4.0 specification
+- Basic understanding of ODPS v4.1 specification
 - Familiarity with Python development tools
 
 ### Areas for Contribution
@@ -105,7 +105,7 @@ Before creating a new issue:
 
 For new features:
 
-1. **Check ODPS v4.0 specification** for compliance requirements
+1. **Check ODPS v4.1 specification** for compliance requirements
 2. **Discuss in GitHub Discussions** before implementing large features
 3. **Create detailed proposals** including:
    - Use case and motivation

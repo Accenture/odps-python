@@ -4,11 +4,15 @@
 
 1. [Core Classes](#core-classes)
 2. [Data Models](#data-models)
+   - [ProductStrategy (v4.1)](#productstrategy-v41)
+   - [KPI (v4.1)](#kpi-v41)
 3. [Validation Framework](#validation-framework)
 4. [Exception Hierarchy](#exception-hierarchy)
 5. [Type Protocols](#type-protocols)
 6. [Enumerations](#enumerations)
+   - [KPI Enums (v4.1)](#kpi-enums-v41)
 7. [Utility Functions](#utility-functions)
+8. [v4.1 Features](#v41-features)
 
 ---
 
@@ -16,7 +20,7 @@
 
 ### OpenDataProduct
 
-The main class for handling ODPS v4.0 documents.
+The main class for handling ODPS v4.1 documents.
 
 ```python
 class OpenDataProduct:
@@ -192,6 +196,130 @@ def check_component_protocols(self) -> Dict[str, bool]:
 
 All data models are implemented as dataclasses with comprehensive type hints.
 
+### ProductStrategy (v4.1)
+
+**New in ODPS v4.1** - Connects data products to business intent, objectives, and KPIs.
+
+```python
+@dataclass
+class ProductStrategy:
+    """
+    Product Strategy - New in ODPS v4.1
+
+    This is "the first open specification where data products declare not just
+    what they are but also why they exist."
+    """
+
+    objectives: List[str] = field(default_factory=list)
+    contributes_to_kpi: Optional[KPI] = None
+    product_kpis: List[KPI] = field(default_factory=list)
+    related_kpis: List[KPI] = field(default_factory=list)
+    strategic_alignment: List[str] = field(default_factory=list)
+```
+
+**Attributes:**
+
+- `objectives` (List[str]): Natural-language business outcomes the product supports
+- `contributes_to_kpi` (Optional[KPI]): Single higher-level business KPI the product is accountable for
+- `product_kpis` (List[KPI]): Product-level metrics measuring direct contribution to business goals
+- `related_kpis` (List[KPI]): Secondary measures tracking side effects and cross-unit value
+- `strategic_alignment` (List[str]): References to corporate initiatives or policy documents
+
+**Example:**
+
+```python
+from odps.models import ProductStrategy, KPI
+
+strategy = ProductStrategy(
+    objectives=[
+        "Reduce customer churn by identifying at-risk customers early",
+        "Improve customer lifetime value through targeted retention campaigns"
+    ],
+    contributes_to_kpi=KPI(
+        name="Customer Retention Rate",
+        unit="percentage",
+        target=95,
+        direction="increase"
+    ),
+    product_kpis=[
+        KPI(
+            name="Churn Prediction Accuracy",
+            unit="percentage",
+            target=85,
+            direction="at_least"
+        )
+    ],
+    strategic_alignment=[
+        "Corporate Strategy 2024: Customer-First Initiative"
+    ]
+)
+```
+
+---
+
+### KPI (v4.1)
+
+**New in ODPS v4.1** - Key Performance Indicator for tracking business or product performance.
+
+```python
+@dataclass
+class KPI:
+    """
+    Key Performance Indicator (KPI) - New in ODPS v4.1
+
+    Represents a measurable metric for tracking business or product performance.
+    Used within ProductStrategy to connect data products to business objectives.
+    """
+
+    # Required field
+    name: str
+
+    # Optional fields
+    id: Optional[str] = None
+    description: Optional[str] = None
+    unit: Optional[str] = None
+    target: Optional[Union[str, int, float]] = None
+    direction: Optional[str] = None
+    timeframe: Optional[str] = None
+    frequency: Optional[str] = None
+    owner: Optional[str] = None
+    calculation: Optional[str] = None
+```
+
+**Attributes:**
+
+- `name` (str, **required**): Human-readable KPI name
+- `id` (Optional[str]): Unique identifier for the KPI
+- `description` (Optional[str]): Human-readable explanation of the KPI
+- `unit` (Optional[str]): Measurement unit (use KPIUnit enum values: percentage, minutes, seconds, count, etc.)
+- `target` (Optional[Union[str, int, float]]): Target value for the KPI
+- `direction` (Optional[str]): How the KPI should move (use KPIDirection enum: increase, decrease, at_least, at_most, equals)
+- `timeframe` (Optional[str]): When target should be met (e.g., "Q4 2024", "by end of year")
+- `frequency` (Optional[str]): Measurement cadence (e.g., "hourly", "daily", "monthly", "quarterly")
+- `owner` (Optional[str]): Responsible role/team for this KPI
+- `calculation` (Optional[str]): Human-readable formula describing how the KPI is calculated
+
+**Example:**
+
+```python
+from odps.models import KPI
+
+kpi = KPI(
+    name="Customer Retention Rate",
+    id="kpi-retention-001",
+    description="Primary business KPI measuring customer retention",
+    unit="percentage",
+    target=95,
+    direction="increase",
+    timeframe="Q4 2024",
+    frequency="monthly",
+    owner="Customer Success Team",
+    calculation="(Customers at end of period / Customers at start) * 100"
+)
+```
+
+---
+
 ### ProductDetails
 
 Core product information (required).
@@ -266,20 +394,20 @@ class DataHolder:
 
 ### DataContract
 
-Data contract specifications.
+Data contract specifications with v4.1 $ref support.
 
 ```python
 @dataclass
 class DataContract:
-    """Data contract specifications."""
-    
-    # ODPS v4.0 fields
+    """Data contract specifications with v4.1 $ref support."""
+
     id: Optional[str] = None
     type: Optional[str] = None  # ODCS or DCS
     contract_version: Optional[str] = None
     contract_url: Optional[str] = None
     spec: Optional[Dict[str, Any]] = None
-    ref: Optional[str] = field(default=None, metadata={'json_key': '$ref'})
+    ref: Optional[str] = None  # URI reference
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 ```
 
 ### License
@@ -318,29 +446,60 @@ class License:
 
 ### DataAccess & DataAccessMethod
 
-Data access methods and endpoints.
+Data access methods and endpoints with v4.1 AI agent support.
 
 ```python
 @dataclass
 class DataAccessMethod:
-    """Individual data access method."""
-    
-    name: Optional[Union[str, Dict[str, str]]] = None
-    description: Optional[Union[str, Dict[str, str]]] = None
-    output_port_type: Optional[str] = None
-    format: Optional[str] = None
+    """Individual data access method with v4.1 $ref and AI support."""
+
+    name: Optional[Dict[str, str]] = None
+    description: Optional[Dict[str, str]] = None
+    output_port_type: Optional[str] = None  # file, API, AI (v4.1), etc.
+    format: Optional[str] = None  # JSON, CSV, MCP (v4.1), etc.
     access_url: Optional[str] = None
     authentication_method: Optional[str] = None
     specs_url: Optional[str] = None
     documentation_url: Optional[str] = None
     specification: Optional[Dict[str, Any]] = None
+    version: Optional[str] = None
+    reference: Optional[str] = None
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
 
 @dataclass
 class DataAccess:
-    """Data access configuration."""
-    
+    """Data access configuration with v4.1 $ref support."""
+
     default: DataAccessMethod
     additional_methods: Dict[str, DataAccessMethod] = field(default_factory=dict)
+    dollar_ref: Optional[str] = None  # JSON Reference ($ref) - New in v4.1
+```
+
+**v4.1 AI Agent Integration Example:**
+
+```python
+from odps.models import DataAccess, DataAccessMethod
+
+# AI Agent Access - NEW in v4.1
+ai_agent_access = DataAccessMethod(
+    name={"en": "AI Agent Access"},
+    description={"en": "Model Context Protocol access for AI agents"},
+    output_port_type="AI",  # NEW: AI output port type
+    format="MCP",  # NEW: MCP (Model Context Protocol) format
+    access_url="mcp://api.example.com/customer-analytics/agent",
+    authentication_method="bearer-token",
+    specification={
+        "protocol": "MCP",
+        "version": "1.0",
+        "capabilities": ["query", "analyze", "predict"],
+        "agent_description": "Autonomous agent for customer churn analysis"
+    }
+)
+
+data_access = DataAccess(
+    default=default_method,
+    additional_methods={"aiAgent": ai_agent_access}
+)
 ```
 
 ### PricingPlans & PricingPlan
@@ -419,10 +578,11 @@ class ValidationRule(ABC):
 
 ### Built-in Validators
 
-The framework includes 13 built-in validator classes:
+The framework includes 14 built-in validator classes:
 
 - `CoreFieldValidator`: Validates required core fields
 - `ProductDetailsValidator`: Validates product details
+- `ProductStrategyValidator`: Validates product strategy and KPIs (v4.1)
 - `DataHolderValidator`: Validates data holder information
 - `LicenseValidator`: Validates license information
 - `DataAccessValidator`: Validates data access methods
@@ -571,8 +731,8 @@ def validate_protocol_compliance(obj: Any, protocol_name: str) -> List[str]:
 
 ```python
 class ProductStatus(Enum):
-    """Valid product status values according to ODPS v4.0."""
-    
+    """Valid product status values according to ODPS v4.1."""
+
     ANNOUNCEMENT = "announcement"
     DRAFT = "draft"
     DEVELOPMENT = "development"
@@ -601,9 +761,112 @@ class ProductVisibility(Enum):
 ```python
 class DataContractType(Enum):
     """Valid data contract types."""
-    
+
     ODCS = "ODCS"  # Open Data Contract Specification
     DCS = "DCS"    # Data Contract Specification
+```
+
+### KPI Enums (v4.1)
+
+**New in ODPS v4.1** - Enumerations for KPI validation.
+
+#### KPIDirection
+
+```python
+class KPIDirection(Enum):
+    """Valid KPI direction values - New in ODPS v4.1."""
+
+    INCREASE = "increase"      # KPI target is to increase the value
+    DECREASE = "decrease"      # KPI target is to decrease the value
+    AT_LEAST = "at_least"      # KPI must be at least the target value
+    AT_MOST = "at_most"        # KPI must be at most the target value
+    EQUALS = "equals"          # KPI must equal the target value
+```
+
+**Usage:**
+
+```python
+from odps.models import KPI
+from odps.enums import KPIDirection
+
+kpi = KPI(
+    name="Customer Retention Rate",
+    target=95,
+    direction=KPIDirection.INCREASE.value  # or simply "increase"
+)
+```
+
+#### KPIUnit
+
+```python
+class KPIUnit(Enum):
+    """Valid KPI unit values - New in ODPS v4.1."""
+
+    # Time units
+    PERCENTAGE = "percentage"
+    MINUTES = "minutes"
+    SECONDS = "seconds"
+    HOURS = "hours"
+    DAYS = "days"
+
+    # Count units
+    COUNT = "count"
+    CURRENCY = "currency"
+    RATIO = "ratio"
+    SCORE = "score"
+
+    # Data size units
+    BYTES = "bytes"
+    KILOBYTES = "kilobytes"
+    MEGABYTES = "megabytes"
+    GIGABYTES = "gigabytes"
+    TERABYTES = "terabytes"
+
+    # Domain-specific units
+    REQUESTS = "requests"
+    TRANSACTIONS = "transactions"
+    USERS = "users"
+    ERRORS = "errors"
+    RECORDS = "records"
+```
+
+**Usage:**
+
+```python
+from odps.models import KPI
+from odps.enums import KPIUnit
+
+kpi = KPI(
+    name="Average Response Time",
+    target=200,
+    unit=KPIUnit.MILLISECONDS.value  # or simply "milliseconds"
+)
+```
+
+#### OutputPortType (Updated for v4.1)
+
+```python
+class OutputPortType(Enum):
+    """Valid output port types."""
+
+    FILE = "file"
+    API = "API"
+    DATABASE = "database"
+    STREAM = "stream"
+    WEBHOOK = "webhook"
+    AI = "AI"  # New in v4.1 - for AI agent integration
+```
+
+**v4.1 AI Port Type Usage:**
+
+```python
+from odps.models import DataAccessMethod
+from odps.enums import OutputPortType
+
+ai_access = DataAccessMethod(
+    output_port_type=OutputPortType.AI.value,  # or simply "AI"
+    format="MCP"  # Model Context Protocol
+)
 ```
 
 ---
@@ -669,10 +932,148 @@ The library implements intelligent caching for optimal performance:
 
 ---
 
+## v4.1 Features
+
+### What's New in ODPS v4.1
+
+ODPS v4.1 introduces groundbreaking features that connect data products to business intent and enable AI agent integration.
+
+#### 1. ProductStrategy - Business Alignment
+
+**The first open specification where data products declare not just what they are but also why they exist.**
+
+```python
+from odps import OpenDataProduct
+from odps.models import ProductStrategy, KPI
+
+product = OpenDataProduct(product_details)
+
+# Define business strategy and KPIs
+product.product_strategy = ProductStrategy(
+    objectives=[
+        "Reduce customer churn by identifying at-risk customers early"
+    ],
+    contributes_to_kpi=KPI(
+        name="Customer Retention Rate",
+        target=95,
+        unit="percentage",
+        direction="increase"
+    )
+)
+```
+
+**Key Features:**
+- `objectives`: Natural-language business outcomes
+- `contributes_to_kpi`: Primary business KPI accountability
+- `product_kpis`: Product-level performance metrics
+- `related_kpis`: Secondary and cross-unit measures
+- `strategic_alignment`: Links to corporate initiatives
+
+#### 2. KPI Model - Performance Tracking
+
+Comprehensive KPI model with 10 fields for complete performance tracking:
+
+```python
+from odps.models import KPI
+
+kpi = KPI(
+    name="Churn Prediction Accuracy",        # Required
+    id="kpi-churn-accuracy",
+    description="Measures accuracy of churn prediction model",
+    unit="percentage",                        # Use KPIUnit enum
+    target=85,
+    direction="at_least",                     # Use KPIDirection enum
+    timeframe="Q4 2024",
+    frequency="monthly",
+    owner="Data Science Team",
+    calculation="(Correct predictions / Total predictions) * 100"
+)
+```
+
+#### 3. AI Agent Integration
+
+Native support for AI agents via Model Context Protocol (MCP):
+
+```python
+from odps.models import DataAccessMethod
+
+ai_access = DataAccessMethod(
+    output_port_type="AI",           # New AI output port type
+    format="MCP",                    # Model Context Protocol
+    access_url="mcp://api.example.com/agent",
+    specification={
+        "protocol": "MCP",
+        "version": "1.0",
+        "capabilities": ["query", "analyze", "predict"]
+    }
+)
+```
+
+#### 4. Enhanced $ref Support
+
+JSON Reference ($ref) support across 9 components for reusability:
+
+```python
+# Internal reference
+data_contract = DataContract(
+    dollar_ref="#/product/dataContract/default"
+)
+
+# External reference
+sla = SLA(
+    dollar_ref="https://example.com/slas/premium.json"
+)
+```
+
+**Supported Components:**
+- DataContract, SLA, SLAProfile
+- DataQuality, DataQualityProfile
+- DataAccess, DataAccessMethod
+- PaymentGateway, PaymentGateways
+
+#### 5. New Enumerations
+
+```python
+from odps.enums import KPIDirection, KPIUnit, OutputPortType
+
+# KPI Direction (5 values)
+KPIDirection.INCREASE
+KPIDirection.DECREASE
+KPIDirection.AT_LEAST
+KPIDirection.AT_MOST
+KPIDirection.EQUALS
+
+# KPI Unit (19 values)
+KPIUnit.PERCENTAGE
+KPIUnit.SECONDS
+KPIUnit.COUNT
+# ... and more
+
+# Output Port Type (updated)
+OutputPortType.AI  # New in v4.1
+```
+
+### Migration from v4.0
+
+**100% Backward Compatible** - All v4.0 documents continue to work without modification.
+
+All v4.1 features are optional:
+- ProductStrategy is optional
+- All KPI fields except `name` are optional
+- AI output port doesn't affect existing DataAccess
+- $ref fields are optional on all components
+
+### Complete v4.1 Example
+
+See [examples/odps_v41_example.py](../examples/odps_v41_example.py) for a comprehensive working example demonstrating all v4.1 features.
+
+---
+
 ## Usage Examples
 
 See the [examples directory](../examples/) for comprehensive usage examples:
 
+- `odps_v41_example.py`: **NEW** - Complete v4.1 features demonstration
 - `basic_usage.py`: Fundamental operations and features
 - `advanced_features.py`: Advanced functionality and customization
 

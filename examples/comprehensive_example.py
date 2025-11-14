@@ -1,5 +1,8 @@
 """
-Example usage of the ODPS Python library with full standards compliance
+Example usage of the ODPS Python library with full standards compliance (ODPS v4.1)
+
+This example demonstrates the ODPS library with international standards compliance.
+For v4.1-specific features (ProductStrategy, KPI, AI agents), see odps_v41_example.py
 """
 
 from odps import OpenDataProduct, ODPSValidationError

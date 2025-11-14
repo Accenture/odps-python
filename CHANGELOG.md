@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🎉 ODPS v4.1 Support
 
-A major update adding full support for ODPS v4.1 specification with ProductStrategy, AI agent integration, and enhanced referencing capabilities.
+Updated to add support for ODPS v4.1 specification with ProductStrategy, AI agent integration, and enhanced referencing capabilities.
 
 #### ✨ New Features (v4.1)
 
